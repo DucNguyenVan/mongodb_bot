@@ -17,7 +17,22 @@ end
 
 
 def has_new_fields_added?
-  true
+  response = get_diff_contents
+  response.each do |file_content|
+    if file_content["filename"] =~ /app\/models\/.*rb/
+      return true if file_content["patch"].include? "field: "
+    end
+  end
+  false
+end
+
+def get_diff_contents
+  HTTParty.get("#{@data.dig('pull_request', '_links', 'self', 'href')}/files",
+    headers: {
+      "Authorization": "token #{GITHUB_ACCESS_TOKEN}",
+      "Content-Type": "application/json",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
+    })
 end
 
 def append_label
