@@ -3,13 +3,13 @@ require 'json'
 require 'pry'
 require 'httparty'
 
-LABEL_NAME = "bug"
-LABEL_APPEND = "duplicate"
-GITHUB_ACCESS_TOKEN=""
+LABEL_NAME = "pr-5-toRelease"
+LABEL_APPEND = "new_field"
+GITHUB_ACCESS_TOKEN=ENV["GITHUB_ACCESS_TOKEN"]
 
 post '/payload' do
   @data = JSON.parse(request.body.read)
-  if has_new_fields_added? && !appended_label?
+  if has_new_fields_added? && !appended_label? && pr_labels.include?(LABEL_NAME)
     append_label
     post_result_to_pr
   end
@@ -36,18 +36,16 @@ def get_diff_contents
 end
 
 def append_label
-  if pr_labels.include?(LABEL_NAME)
-    response = HTTParty.post("#{@data.dig('pull_request', 'issue_url')}/labels",
-    headers: {
-      "Authorization": "token #{GITHUB_ACCESS_TOKEN}",
-      "Content-Type": "application/json",
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
-    },
-    body: {
-      "labels": pr_labels.push(LABEL_APPEND).uniq,
-    }.to_json
-  )
-  end
+  response = HTTParty.post("#{@data.dig('pull_request', 'issue_url')}/labels",
+  headers: {
+    "Authorization": "token #{GITHUB_ACCESS_TOKEN}",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
+  },
+  body: {
+    "labels": pr_labels.push(LABEL_APPEND).uniq,
+  }.to_json
+)
 end
 
 def pr_labels
