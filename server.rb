@@ -20,7 +20,7 @@ def has_new_fields_added?
   response = get_diff_contents
   response.each do |file_content|
     if file_content["filename"] =~ /app\/models\/.*rb/
-      return true if file_content["patch"].include? "field: "
+      return true unless file_content["patch"].match(%r{\n\+ *field:}).nil?
     end
   end
   false
