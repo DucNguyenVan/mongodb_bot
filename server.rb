@@ -58,7 +58,7 @@ def appended_label?
 end
 
 def post_result_to_pr
-  mess = "Founded new field(s) in your pullrequest."
+  mess = "Founded new field(s) in your pullrequest. Automatic add new_field label!"
   response = HTTParty.post("#{@data.dig('pull_request', 'comments_url')}",
     headers: {
       "Authorization": "token #{GITHUB_ACCESS_TOKEN}",
