@@ -9,7 +9,7 @@ GITHUB_ACCESS_TOKEN=ENV["GITHUB_ACCESS_TOKEN"]
 
 post '/payload' do
   @data = JSON.parse(request.body.read)
-  if has_new_fields_added? && !appended_label? && pr_labels.include?(LABEL_NAME)
+  if !appended_label? && pr_labels.include?(LABEL_NAME) && has_new_fields_added?
     append_label
     post_result_to_pr
   end
@@ -20,7 +20,7 @@ def has_new_fields_added?
   response = get_diff_contents
   response.each do |file_content|
     if file_content["filename"] =~ /app\/models\/.*rb/
-      return true unless file_content["patch"].match(%r{\n\+ *field:}).nil?
+      return true unless file_content["patch"].match(%r{\n\+ *field}).nil?
     end
   end
   false
